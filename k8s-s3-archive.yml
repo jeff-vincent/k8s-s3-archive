@@ -1,0 +1,45 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: s3archive-service
+spec:
+  selector:
+    app: s3archive
+  ports:
+    - port: 80
+      targetPort: 8888
+  type: LoadBalancer
+  externalIPs:
+  - 10.221.188.13 # needs to be set
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-s3-archive
+  labels:
+    app: s3archive
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: s3archive
+  template:
+    metadata:
+      labels:
+        app: s3archive
+    spec:
+      containers:
+      - name: k8s-s3-archive
+        image: jdvincent/k8s-s3-archive
+        env:
+        - name: AWS_SECRET_KEY
+          value: "<your_secret_key>"
+        - name: AWS_ACCESS_KEY
+          value: "<your_access_key>"
+        - name: S3_BUCKET_NAME
+          value: "<your_bucket_name>"
+        - name: AWS_REGION_NAME
+          value: "<us-west-2>"
+        ports:
+        - containerPort: 8888
